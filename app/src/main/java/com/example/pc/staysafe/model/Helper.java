@@ -1,39 +1,33 @@
-package com.example.pc.staysafe.model;
+package com.example.pc.staysafe.Connection;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
- * Created by erasmus on 9.11.3017.
+ * Created by Alberto on 09/11/2017.
  */
 
-/**
- * DATABASE INIT
- */
+public class Helper extends SQLiteOpenHelper{
 
-final class Helper extends SQLiteOpenHelper {
-
-    //private static final String DATABASE_NAME = "note_database";
-    private static final int DATABASE_VERSION = 1;
-
-    public Helper(Context context) {
-        super(context, "save_database", null, DATABASE_VERSION);
+    private static final String DB_Name = "Database.sqlite";
+    public Helper(Context context){
+        super(context, DB_Name, null, 1 );
 
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE question(note_id INTEGER PRIMARY KEY AUTO_INCREMENT, question TEXT NOT NULL, topic FOREIGN KEY REFERENCES topic(topic_id), language INT NOT NULL);");
-        db.execSQL("CREATE TABLE answer(answer_id INTEGER PRIMARY KEY AUTO_INCREMENT, answer TEXT NOT NULL, correct INT NOT NULL);");
-        db.execSQL("CREATE TABLE topic(topic_id INTEGER PRIMARY KEY AUTO_INCREMENT, topic TEXT NOT NULL);");
-        db.execSQL("CREATE TABLE answer_has_question();");
+    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+       sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `question` ( `ID` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Question` TEXT NOT NULL, `IDTopic` INTEGER NOT NULL, `IDLanguage` INTEGER NOT NULL)");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `Topic` ( `IDTopic` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Topic` TEXT NOT NULL);");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `Answer_Question` ( `IDAnswer` INTEGER NOT NULL, `IDQuestion` INTEGER NOT NULL, PRIMARY KEY(`IDAnswer`,`IDQuestion`);");
+                sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS `Answer` ( `IDAnswer` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `Answer` TEXT NOT NULL, `Correct` INTEGER NOT NULL);");
+
     }
 
-
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-
+    public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
+        //IF NEW VERSION IS AVAILABLE
     }
 }

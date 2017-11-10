@@ -1,57 +1,58 @@
-package com.example.pc.staysafe.model;
+package com.example.pc.staysafe.Connection;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.pc.staysafe.databaseInfo.Note;
-import com.example.pc.staysafe.model.Model;
+import com.example.pc.staysafe.Common.Quiz_Handler;
+import com.example.pc.staysafe.Quiz.Answer;
+import com.example.pc.staysafe.Quiz.Question;
+import com.example.pc.staysafe.Quiz.Quiz;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
 
 /**
- * Created by erasmus on 9.11.2017.
+ * Created by Alberto on 09/11/2017.
  */
 
-public final class Model {
-    private final Helper helper;
-    private final SQLiteDatabase database;
-
-    //Construct itself
-     public Model(Context context) {
+public class Model {
+    Helper helper;
+    SQLiteDatabase database;
+    public Model(Context context){
         helper = new Helper(context);
         database = helper.getWritableDatabase();
     }
-    // Columns
-    public static String COL_ID = "note_id";
-    public static String COL_TITLE = "title";
-    public static String COL_AUTHOR = "author";
-    public static String COL_NOTE = "note";
-    private final String TABLE_NAME ="note";
-
-    public void insertNote(String author, String title, String note) {
-        String SQL = String.format("INSERT INTO %s (%s, %s, %s) VALUES(?, ?, ?);",
-                TABLE_NAME, COL_AUTHOR, COL_TITLE, COL_NOTE);
-        database.execSQL(SQL, new String[] {author, title, note});
-    }
 
 
-    public ArrayList<Note> fetchAllNotes() {
-        ArrayList<Note> arrayList = new ArrayList<>();
 
-        String SQL = String.format("SELECT %s, %s, %s, %s FROM %s;",
-                COL_ID, COL_AUTHOR, COL_TITLE, COL_NOTE, TABLE_NAME);
 
-        Cursor cursor = database.rawQuery(SQL, new String[]{});
+    public Quiz getQuiz (int id, int Type,int Language){
+        ArrayList<Answer> _Answer = new ArrayList<>();
+        Question _Question = null;
+       Cursor Question_Cursor = database.rawQuery(
+                String.format("SELECT %s,%s,%s,%s FROM %s WHERE id = %s AND type = %s AND Language = %s;","Quiz_Handler","Answers","idquestions","questions","topic_idtopic","id","language",Integer.toString(Type),Integer.toString(Language)),null);
 
-        if (cursor.moveToFirst()) {
-            do {
-                arrayList.add(new Note(cursor));
-            } while (cursor.moveToNext());
 
+        if(Question_Cursor.moveToFirst()){
+            do{
+                    _Question = (new Question(Question_Cursor.getInt(Question_Cursor.getColumnIndex("ID")),Question_Cursor.getInt(Question_Cursor.getColumnIndex("topic_idtopic")),Question_Cursor.getString(Question_Cursor.getColumnIndex("question")),Question_Cursor.getInt(Question_Cursor.getColumnIndex("language")),0));
+                Cursor Answer_Cursor = database.rawQuery(String.format("SELECT %s,%s FROM %s JOIN %s on %s = %s JOIN %s on %s = %s","answer","correct","answer","answer_has_question", "question.idquestion","answer_has_question.answer_idanswer", "answer", "answer.idanswer","question_idquestions"),null);
+                if(Answer_Cursor.moveToFirst()){
+                    do{
+                       _Answer.add((new Answer(Answer_Cursor.getInt(Answer_Cursor.getColumnIndex("correct")),Answer_Cursor.getString(Answer_Cursor.getColumnIndex("Answer")))));
+                    }while(Question_Cursor.moveToNext());
+                }
+
+
+
+            }while(Question_Cursor.moveToNext());
         }
+        Quiz quiz = new Quiz(_Question,_Answer);
 
-        return arrayList;
+        return quiz;
+
+
     }
-
 }
